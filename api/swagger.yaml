@@ -1,0 +1,585 @@
+openapi: 3.0.0
+info:
+  title: REST API сервиса интеграции кассетниц ТЛД
+  description: Интерфейс Прикладного Программирования выдачи ТЛД
+  version: "1.0"
+servers:
+- url: http://localhost:3000
+paths:
+  /tld/take:
+    get:
+      tags: []
+      summary: Запрос на получение ТЛД
+      description: Получение данных работника и номеров ячеек по номеру пропуска для
+        алгоритма выдачи дозиметров
+      operationId: BELAES-PDS001-IF-0001
+      parameters:
+      - name: passID
+        in: query
+        description: Идентификатор пропуска работника
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: dispenserID
+        in: query
+        description: Идентификатор УВД
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+        "204":
+          description: No Content (Работник не найден)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "300":
+          description: Multiple Choices (найдено больше одного работника)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "400":
+          description: Bad Request (ошибки в данных запроса)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "500":
+          description: Internal Server Error (внутренние ошибки сервиса)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        ? ""
+        : description: ""
+      security:
+      - oauth2: []
+    post:
+      summary: Регистрация получения ТЛД работником
+      description: "Когда работник забирает дозиметр и закрывает ячейку, УВД отсыл\
+        ает запрос на регистрацию взятия дозиметра в АСИДК по идентификатору УВД,\
+        \ номеру ячейки и номеру пропуска."
+      operationId: BELAES-PDS001-IF-0002
+      parameters:
+      - name: dispenserID
+        in: query
+        description: Идентификатор УВД
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: Cell_ID
+        in: query
+        description: Идентификатор ячейки
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: dosimeterID
+        in: query
+        description: Идентификатор дозиметра
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: passID
+        in: query
+        description: Номер пропуска работника
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: datetime
+        in: query
+        description: Дата и время события
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: presence
+        in: query
+        description: Состояние датчика наличия дозиметра
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                x-content-type: application/json
+        "300":
+          description: Multiple Choices (Найдено больше одного варианта данных)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "400":
+          description: Bad Request (Ошибки в данных запроса)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "401":
+          description: Unauthorized (Непройдена авторизация)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "500":
+          description: Internal Server Error (внутренние ошибки сервиса)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+      security:
+      - oauth2: []
+  /tld/drop:
+    get:
+      tags: []
+      summary: Запрос на сдачу ТЛД
+      description: По номеру пропуска возвращает данные работника и список дозиметров
+        которые нужно сдать
+      operationId: BELAES-PDS001-IF-0009
+      parameters:
+      - name: passID
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+        "204":
+          description: No Content (Работник не найден)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "300":
+          description: Multiple Choices (Найдено более одного работника)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "400":
+          description: Bad Request (Ошибки в данных запроса)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "500":
+          description: 'Not Found (Внутренние ошибки сервиса) '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+      security:
+      - oauth2: []
+    post:
+      summary: Запрос регистрации сдачи ТЛД работником
+      description: |-
+        Когда работник кладёт дозиметр и закрывает ячейку, УВТЛД отсылает запрос на регистрацию возврата дозиметра в АСИДК по идентификатору УВТЛД, номеру ячейки и номеру пропуска.
+
+        Поскольку датчики заполненности ячейки часто отказывают, производят ложные срабатывания,  следует обеспечить выбор условия регистрации сдачи Администратором АСИДК.
+        Регистрацию сдачи осуществлять:
+
+        - по событию по  закрытия ячейки или
+        - по событию заполненной закрытой ячейки
+      operationId: BELAES-PDS001-IF-0012
+      parameters:
+      - name: dispenserID
+        in: query
+        description: Идентификатор УВД
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: Cell_ID
+        in: query
+        description: Номер ячейки
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: dosimeterID
+        in: query
+        description: Идентификатор дозиметра
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: passID
+        in: query
+        description: Номер пропуска работника
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: datetime
+        in: query
+        description: Дата и время события
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: presence
+        in: query
+        description: Состояние датчика наличия дозиметра
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                x-content-type: application/json
+        "204":
+          description: No Content (Данные не найдены)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "300":
+          description: Multiple Choices (Найдено больше одного обьекта)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "400":
+          description: Bad Request (Ошибки в данных запроса)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "401":
+          description: Unauthorized (Не пройдена вторизация)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "500":
+          description: Internal Server Error (Внутренние ошибки сервиса)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+      security:
+      - oauth2: []
+  /tld/drop/cells:
+    get:
+      summary: Запрос номеров ячеек для сдачи ТЛД
+      description: "По номеру УВД и идентификатору дозиметра, определяется какую я\
+        чейку нужно открыть, чтобы получить от работника выданный дозиметр. \nКром\
+        е поиска ячейки АСИДК проверяет, свой ли дозиметр сдаёт работник."
+      operationId: BELAES-PDS001-IF-0010
+      parameters:
+      - name: dispenserID
+        in: query
+        description: Идентификатор УВД
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: dosimeterID
+        in: query
+        description: Идентификатор дозиметра
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cell'
+        "204":
+          description: No Content (Дозиметр или УВД не найдены)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "300":
+          description: Multiple Choices (Найдено больше одного дозиметра или УВД)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "400":
+          description: Bad Request (Ошибка в данных запроса)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "500":
+          description: Internal Server Error (Внутренние ошибки сервиса)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+      security:
+      - oauth2: []
+  /tld/contamination:
+    post:
+      summary: Запрос на регистрацию  загрязнённого ТЛД
+      description: Запрос на регистрацию  загрязнённого ТЛД
+      operationId: BELAES-PDS001-IF-0011
+      parameters:
+      - name: dispenserID
+        in: query
+        description: Идентификатор УВД
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: dosimeterID
+        in: query
+        description: Идентификатор дозиметра
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: passID
+        in: query
+        description: Номер пропуска
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: datetime
+        in: query
+        description: Дата и время события
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: dose
+        in: query
+        description: Доза загрязнения (необязательно)
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                x-content-type: application/json
+        "204":
+          description: No Content (Данные не найдены)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "300":
+          description: Multiple Choices (Найдено больше одного обьекта)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "400":
+          description: Bad Request (Ошибка в данных запроса)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "401":
+          description: Unauthorized (Не пройдена авторизация)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+        "500":
+          description: Internal Server Error (Внутренняя ошибка сервиса)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fault'
+      security:
+      - oauth2: []
+components:
+  schemas:
+    Fault:
+      title: Fault
+      type: object
+      properties:
+        id:
+          type: string
+          description: Идентификатор ошибки
+        description:
+          type: string
+          description: Описание ошибки
+      description: Описание данных ошибки запросов
+      x-stoplight:
+        id: 1mug7b9vx7o90
+    Cell:
+      title: Cell
+      type: object
+      properties:
+        Cell_ID:
+          type: string
+          description: Идентификатор ячейки
+        dispeneserID:
+          type: string
+          description: Идентификатор УВД
+        state:
+          type: string
+          description: Состояние ячейки
+      description: Описание ячейки УВД
+      example:
+        dispeneserID: dispeneserID
+        Cell_ID: Cell_ID
+        state: state
+      x-stoplight:
+        id: 9up1d2tzxj9o1
+    Person:
+      title: Person
+      type: object
+      properties:
+        passID:
+          type: string
+          description: Номер пропуска работника
+        name:
+          type: string
+          description: ФИО Работника
+        role:
+          type: string
+          description: "Роль работника если есть: Администратор, инженер"
+      description: Описание работника
+      example:
+        role: role
+        passID: passID
+        name: name
+      x-stoplight:
+        id: fi43e3dqjypdf
+    dosimeter:
+      title: dosimeter
+      type: object
+      properties:
+        id:
+          type: string
+          description: Идентификатор дозиметра
+        description:
+          type: string
+          description: Описание дозиметра
+        title:
+          type: string
+          description: Название дозиметра
+        dispenserID:
+          type: string
+          description: Идентификатор УВД
+        dispenserDesc:
+          type: string
+          description: Описание УВД - Место нахождения
+      description: Описание данных дозиметра
+      example:
+        dispenserDesc: dispenserDesc
+        dispenserID: dispenserID
+        description: description
+        id: id
+        title: title
+      x-stoplight:
+        id: iewf0hxoq4sae
+    inline_response_200:
+      type: object
+      properties:
+        person:
+          $ref: '#/components/schemas/Person'
+        cells:
+          type: array
+          items:
+            $ref: '#/components/schemas/Cell'
+      example:
+        cells:
+        - dispeneserID: dispeneserID
+          Cell_ID: Cell_ID
+          state: state
+        - dispeneserID: dispeneserID
+          Cell_ID: Cell_ID
+          state: state
+        person:
+          role: role
+          passID: passID
+          name: name
+    inline_response_200_1:
+      type: object
+      properties:
+        Person:
+          $ref: '#/components/schemas/Person'
+        dosimeters:
+          type: array
+          items:
+            $ref: '#/components/schemas/dosimeter'
+      example:
+        dosimeters:
+        - dispenserDesc: dispenserDesc
+          dispenserID: dispenserID
+          description: description
+          id: id
+          title: title
+        - dispenserDesc: dispenserDesc
+          dispenserID: dispenserID
+          description: description
+          id: id
+          title: title
+        Person:
+          role: role
+          passID: passID
+          name: name
+  securitySchemes:
+    oauth2:
+      type: apiKey
+      description: "Standard Authorization header using the Bearer scheme. Example:\
+        \ \"bearer {token}\""
+      name: Authorization
+      in: header
+x-stoplight:
+  id: xwkakj5rn0y0z
