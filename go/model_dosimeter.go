@@ -12,10 +12,10 @@ package swagger
 type Dosimeter struct {
 	// Идентификатор дозиметра
 	Id string `json:"id,omitempty"`
-	// Описание дозиметра
-	Description string `json:"description,omitempty"`
 	// Название дозиметра
 	Title string `json:"title,omitempty"`
+	// Описание дозиметра
+	Description string `json:"description,omitempty"`
 	// Идентификатор УВД
 	DispenserID string `json:"dispenserID,omitempty"`
 	// Описание УВД - Место нахождения

@@ -9,23 +9,29 @@
 package main
 
 import (
+	auth "ASIDK_Dispenser_Service/Auth"
+	"github.com/gin-gonic/gin"
 	"log"
-	"net/http"
-
-	// WARNING!
-	// Change this to a fully-qualified import path
-	// once you place this file into your project.
-	// For example,
-	//
-	//    sw "github.com/myname/myrepo/go"
-	//
-	sw "ASIDK_Dispenser_Service/go"
 )
 
 func main() {
 	log.Printf("Server started")
 
-	router := sw.NewRouter()
+	r := gin.Default()
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	authMiddleware, err := auth.Auth()
+	if err != nil {
+		log.Fatal("JWT Error:" + err.Error())
+	}
+	errInit := authMiddleware.MiddlewareInit()
+
+	zones := r.Group("/zones")
+	//zones.Use(authMiddleware.MiddlewareFun)
+	//	{
+	//		{
+	//		zones.GET("/:zoneid/pass/:pass", GetUser)
+	//		zones.GET("", GetZones)
+	//	}
+	//}
+
 }

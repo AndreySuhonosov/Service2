@@ -72,30 +72,6 @@ paths:
         \ номеру ячейки и номеру пропуска."
       operationId: BELAES-PDS001-IF-0002
       parameters:
-      - name: dispenserID
-        in: query
-        description: Идентификатор УВД
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-      - name: Cell_ID
-        in: query
-        description: Идентификатор ячейки
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-      - name: dosimeterID
-        in: query
-        description: Идентификатор дозиметра
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
       - name: passID
         in: query
         description: Номер пропуска работника
@@ -104,22 +80,20 @@ paths:
         explode: true
         schema:
           type: string
-      - name: datetime
+      - name: dispenserID
         in: query
-        description: Дата и время события
+        description: Идентификатор УВД
         required: false
         style: form
         explode: true
         schema:
           type: string
-      - name: presence
-        in: query
-        description: Состояние датчика наличия дозиметра
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tld_take_body'
       responses:
         "200":
           description: OK
@@ -214,30 +188,6 @@ paths:
         - по событию заполненной закрытой ячейки
       operationId: BELAES-PDS001-IF-0012
       parameters:
-      - name: dispenserID
-        in: query
-        description: Идентификатор УВД
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-      - name: Cell_ID
-        in: query
-        description: Номер ячейки
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-      - name: dosimeterID
-        in: query
-        description: Идентификатор дозиметра
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
       - name: passID
         in: query
         description: Номер пропуска работника
@@ -246,22 +196,19 @@ paths:
         explode: true
         schema:
           type: string
-      - name: datetime
+      - name: dispenserID
         in: query
-        description: Дата и время события
+        description: Идентификатор УВД
         required: false
         style: form
         explode: true
         schema:
           type: string
-      - name: presence
-        in: query
-        description: Состояние датчика наличия дозиметра
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tld_drop_body'
       responses:
         "200":
           description: OK
@@ -310,22 +257,19 @@ paths:
         е поиска ячейки АСИДК проверяет, свой ли дозиметр сдаёт работник."
       operationId: BELAES-PDS001-IF-0010
       parameters:
-      - name: dispenserID
+      - name: passID
         in: query
-        description: Идентификатор УВД
+        description: Номер пропуска
         required: false
         style: form
         explode: true
         schema:
           type: string
-      - name: dosimeterID
-        in: query
-        description: Идентификатор дозиметра
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/drop_cells_body'
       responses:
         "200":
           description: OK
@@ -365,22 +309,6 @@ paths:
       description: Запрос на регистрацию  загрязнённого ТЛД
       operationId: BELAES-PDS001-IF-0011
       parameters:
-      - name: dispenserID
-        in: query
-        description: Идентификатор УВД
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-      - name: dosimeterID
-        in: query
-        description: Идентификатор дозиметра
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
       - name: passID
         in: query
         description: Номер пропуска
@@ -389,22 +317,19 @@ paths:
         explode: true
         schema:
           type: string
-      - name: datetime
+      - name: dispenserID
         in: query
-        description: Дата и время события
+        description: Идентификатор УВД
         required: false
         style: form
         explode: true
         schema:
           type: string
-      - name: dose
-        in: query
-        description: Доза загрязнения (необязательно)
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tld_contamination_body'
       responses:
         "200":
           description: OK
@@ -507,12 +432,12 @@ components:
         id:
           type: string
           description: Идентификатор дозиметра
-        description:
-          type: string
-          description: Описание дозиметра
         title:
           type: string
           description: Название дозиметра
+        description:
+          type: string
+          description: Описание дозиметра
         dispenserID:
           type: string
           description: Идентификатор УВД
@@ -549,6 +474,21 @@ components:
           role: role
           passID: passID
           name: name
+    tld_take_body:
+      type: object
+      properties:
+        Cell_ID:
+          type: string
+          description: Идентификатор ячейки
+        dosimeterID:
+          type: string
+          description: Идентификатор дозиметра
+        datetime:
+          type: string
+          description: Дата и время события
+        presence:
+          type: string
+          description: Состояние датчика наличия дозиметра
     inline_response_200_1:
       type: object
       properties:
@@ -574,6 +514,42 @@ components:
           role: role
           passID: passID
           name: name
+    tld_drop_body:
+      type: object
+      properties:
+        Cell_ID:
+          type: string
+          description: Номер ячейки
+        dosimeterID:
+          type: string
+          description: Идентификатор дозиметра
+        datetime:
+          type: string
+          description: Дата и время события
+        presence:
+          type: string
+          description: Состояние датчика наличия дозиметра
+    drop_cells_body:
+      type: object
+      properties:
+        dispenserID:
+          type: string
+          description: Идентификатор УВД
+        dosimeterID:
+          type: string
+          description: Идентификатор дозиметра
+    tld_contamination_body:
+      type: object
+      properties:
+        dosimeterID:
+          type: string
+          description: Идентификатор дозиметра
+        datetime:
+          type: string
+          description: Дата и время события
+        dose:
+          type: string
+          description: Доза загрязнения (необязательно)
   securitySchemes:
     oauth2:
       type: apiKey
