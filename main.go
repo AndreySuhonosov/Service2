@@ -8,30 +8,6 @@
  */
 package main
 
-import (
-	auth "ASIDK_Dispenser_Service/Auth"
-	"github.com/gin-gonic/gin"
-	"log"
-)
-
 func main() {
-	log.Printf("Server started")
-
-	r := gin.Default()
-
-	authMiddleware, err := auth.Auth()
-	if err != nil {
-		log.Fatal("JWT Error:" + err.Error())
-	}
-	errInit := authMiddleware.MiddlewareInit()
-
-	zones := r.Group("/zones")
-	//zones.Use(authMiddleware.MiddlewareFun)
-	//	{
-	//		{
-	//		zones.GET("/:zoneid/pass/:pass", GetUser)
-	//		zones.GET("", GetZones)
-	//	}
-	//}
 
 }
